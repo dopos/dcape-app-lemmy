@@ -1,19 +1,19 @@
-# dcape-app-template
+# dcape-app-lemmy
 
 [![GitHub Release][1]][2] [![GitHub code size in bytes][3]]() [![GitHub license][4]][5]
 
-[1]: https://img.shields.io/github/release/dopos/dcape-app-template.svg
-[2]: https://github.com/dopos/dcape-app-template/releases
-[3]: https://img.shields.io/github/languages/code-size/dopos/dcape-app-template.svg
-[4]: https://img.shields.io/github/license/dopos/dcape-app-template.svg
+[1]: https://img.shields.io/github/release/dopos/dcape-app-lemmy.svg
+[2]: https://github.com/dopos/dcape-app-lemmy/releases
+[3]: https://img.shields.io/github/languages/code-size/dopos/dcape-app-lemmy.svg
+[4]: https://img.shields.io/github/license/dopos/dcape-app-lemmy.svg
 [5]: LICENSE
 
-[upstream_name](https://upstream_url) application package for [dcape](https://github.com/dopos/dcape).
+[lemmy](https://join-lemmy.org/) application package for [dcape](https://github.com/dopos/dcape).
 
 ## Upstream
 
 * Project: [upstream_name](https://upstream_url)
-* Docker: [template](https://hub.docker.com/r/template)
+* Docker: [lemmy](https://hub.docker.com/r/dessalines/lemmy), [lemmy-ui](https://hub.docker.com/r/dessalines/lemmy-ui)
 
 ## Requirements
 
@@ -38,8 +38,8 @@
 
 Run commands on deploy host with [dcape](https://github.com/dopos/dcape) installed:
 ```bash
-git clone https://github.com/dopos/dcape-app-template.git
-cd dcape-app-template
+git clone https://github.com/dopos/dcape-app-lemmy.git
+cd dcape-app-lemmy
 make config-if
 ... <edit .env>
 make up

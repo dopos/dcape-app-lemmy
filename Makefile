@@ -7,19 +7,39 @@ CFG                ?= .env
 CFG_BAK            ?= $(CFG).bak
 
 #- App name
-APP_NAME           ?= service-template
+APP_NAME           ?= lemmy
 
 #- Docker image name
-IMAGE              ?= ghcr.io/lekovr/service-template
+IMAGE              ?= dessalines/lemmy-ui
 
 #- Docker image tag
-IMAGE_VER          ?= 0.1.0
+IMAGE_VER          ?= 0.19.2
 
-# If you need database, uncomment this var
-#USE_DB              = yes
+#- lemmy docker image
+LEMMY_IMAGE        ?= dessalines/lemmy
+#- lemmy docker image tag
+LEMMY_IMAGE_VER    ?= $(IMAGE_VER)
 
-# If you need user name and password, uncomment this var
-#ADD_USER            = yes
+#- pict-rs docker image
+PICTRS_IMAGE       ?= docker.io/asonix/pictrs
+#- pict-rs docker image tag
+PICTRS_IMAGE_VER   ?= 0.4.7
+#- pict-rs API key
+PICTRS_API_KEY     ?= $(shell < /dev/urandom tr -dc A-Za-z0-9 | head -c14; echo)
+
+#- Hostname and port of the smtp server
+SMTP_SERVER        ?=
+#- Login name for smtp server
+SMTP_USER          ?=
+#- Password to login to the smtp server
+SMTP_PASS          ?=
+#- Address to send emails from, eg "noreply@your-instance.com"
+SMTP_FROM          ?=
+#- Whether or not smtp connections should use tls. Can be none, tls, or starttls
+SMTP_TLS_TYPE      ?= none
+
+USE_DB              = yes
+ADD_USER            = yes
 
 # ------------------------------------------------------------------------------
 
@@ -31,12 +51,42 @@ export
 export
 
 # This content will be added to .env
-# define CONFIG_CUSTOM
-# # ------------------------------------------------------------------------------
-# # Sample config for .env
-# #SOME_VAR=value
-#
-# endef
+define CONFIG_HJSON
+  # Settings related to activitypub federation
+  # Pictrs image server configuration.
+  pictrs: {
+    # Address where pictrs is available (for image hosting)
+    url: "http://pictrs:8080/"
+    # Set a custom pictrs API key. ( Required for deleting images )
+    api_key: "$(PICTRS_API_KEY)"
+  }
+  # Email sending configuration. All options except login/password are mandatory
+  email: {
+    # Hostname and port of the smtp server
+    smtp_server: "$(SMTP_SERVER)"
+    # Login name for smtp server
+    smtp_login: "$(SMTP_USER)"
+    # Password to login to the smtp server
+    smtp_password: "$(SMTP_PASS)"
+    # Address to send emails from, eg "noreply@your-instance.com"
+    smtp_from_address: "$(SMTP_FROM)"
+    # Whether or not smtp connections should use tls. Can be none, tls, or starttls
+    tls_type: "$(SMTP_TLS)"
+  }
+  # Parameters for automatic configuration of new instance (only used at first start)
+  setup: {
+    # Username for the admin user
+    admin_username: "$(USER_NAME)"
+    # Password for the admin user. It must be at least 10 characters.
+    admin_password: "$(USER_PASS)"
+    # Name of the site (can be changed later)
+    site_name: "My Lemmy Instance"
+    # Email for the admin user (optional, can be omitted and set later through the website)
+    admin_email: "$(USER_EMAIL)"
+  }
+  # the domain name of your instance (mandatory)
+  hostname: "$(APP_SITE)"
+endef
 
 # ------------------------------------------------------------------------------
 # Find and include DCAPE_ROOT/Makefile
@@ -56,5 +106,17 @@ use-template:
 
 .default-deploy: prep
 
-prep:
+prep: lemmy.hjson
 	@echo "Just to show we able to attach"
+	mkdir -p volumes/pictrs
+	sudo chown -R 991:991 volumes/pictrs
+
+lemmy.hjson:
+	@echo "$$CONFIG_HJSON" > $@
+
+
+getconfig:
+	wget https://raw.githubusercontent.com/LemmyNet/lemmy-ansible/main/templates/docker-compose.yml
+	wget https://raw.githubusercontent.com/LemmyNet/lemmy-ansible/main/examples/config.hjson -O lemmy.hjson
+	wget https://raw.githubusercontent.com/LemmyNet/lemmy-ansible/main/templates/nginx_internal.conf
+	wget https://raw.githubusercontent.com/LemmyNet/lemmy-ansible/main/files/proxy_params

@@ -1,9 +1,75 @@
-# This file will be joined with docker-compose.app.yml from dcape
-# See https://github.com/dopos/dcape
+version: "3.7"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "4"
 
 services:
-  # This service will extend code from dcape
   app:
     environment:
-      # Some var to keep YML struct
-      - DEBUG=yes
+      - LEMMY_UI_LEMMY_EXTERNAL_HOST=${APP_SITE}
+      - LEMMY_UI_LEMMY_INTERNAL_HOST=lemmy:8536
+      - LEMMY_HTTPS=true
+    volumes:
+      - ./volumes/lemmy-ui/extra_themes:/app/extra_themes
+    labels:
+      - traefik.http.services.${APP_TAG}.loadbalancer.server.port=1234
+    depends_on:
+      - lemmy
+    restart: always
+    logging: *default-logging
+
+  lemmy:
+    image: ${LEMMY_IMAGE}:${LEMMY_IMAGE_VER}
+    hostname: lemmy
+    restart: always
+    logging: *default-logging
+    environment:
+      - LEMMY_DATABASE_URL=postgres://${PGUSER}:${PGPASSWORD}@db/${PGDATABASE}?sslmode=disable
+#      - LEMMY_SMTP_PASSWORD=${SMTP_PASSWORD}
+      - RUST_BACKTRACE=1
+    labels:
+      - traefik.enable=true
+      - dcape.traefik.tag=${DCAPE_TAG}
+      - traefik.http.routers.${APP_TAG}_srv.tls=${USE_TLS}
+      - traefik.http.routers.${APP_TAG}_srv.tls.certresolver=default
+      # code from https://github.com/LemmyNet/lemmy/pull/3502/files
+      - traefik.http.routers.${APP_TAG}_srv.rule=Host(`${APP_SITE}`) && (PathPrefix(`/api`) || PathPrefix(`/pictrs`) || PathPrefix(`/feeds`) || PathPrefix(`/nodeinfo`) || PathPrefix(`/.well-known`) || Method(`POST`) || HeadersRegexp(`Accept`, `^[Aa]pplication/.*`))
+      # Docker stack doesn't provide port information to traefik, so we need to set it manually
+      - traefik.http.services.${APP_TAG}_srv.loadbalancer.server.port=8536
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/ssl/certs:/etc/ssl/certs:ro
+      - ./lemmy.hjson:/config/config.hjson:Z
+    depends_on:
+      - pictrs
+
+  pictrs:
+    image: ${PICTRS_IMAGE}:${PICTRS_IMAGE_VER}
+    # this needs to match the pictrs url in lemmy.hjson
+    hostname: pictrs
+    # we can set options to pictrs like this, here we set max. image size and forced format for conversion
+    # entrypoint: /sbin/tini -- /usr/local/bin/pict-rs -p /mnt -m 4 --image-format webp
+    environment:
+      #- PICTRS_OPENTELEMETRY_URL=http://otel:4137
+      - PICTRS__API_KEY=${PICTRS_API_KEY}
+      - RUST_LOG=debug
+      - RUST_BACKTRACE=full
+      - PICTRS__MEDIA__VIDEO_CODEC=vp9
+      - PICTRS__MEDIA__GIF__MAX_WIDTH=256
+      - PICTRS__MEDIA__GIF__MAX_HEIGHT=256
+      - PICTRS__MEDIA__GIF__MAX_AREA=65536
+      - PICTRS__MEDIA__GIF__MAX_FRAME_COUNT=400
+    user: 991:991
+    volumes:
+      - ./volumes/pictrs:/mnt:Z
+    restart: always
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          memory: 690m
+
