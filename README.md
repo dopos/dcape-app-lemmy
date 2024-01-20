@@ -12,7 +12,7 @@
 
 ## Upstream
 
-* Project: [upstream_name](https://upstream_url)
+* Project: [Lemmy](https://join-lemmy.org/)
 * Docker: [lemmy](https://hub.docker.com/r/dessalines/lemmy), [lemmy-ui](https://hub.docker.com/r/dessalines/lemmy-ui)
 
 ## Requirements
@@ -31,7 +31,7 @@
 * CI/CD: Activate repo
 * VCS: "Test delivery", config sample will be saved to config service (enfist in dcape)
 * Config: Edit config vars and remove .sample from config name
-* VCS: "Test delivery" again (or Drone: "Restart") - app will be installed and started on CI/CD host
+* VCS: "Test delivery" again (or CI/CD: "Restart") - app will be installed and started on CI/CD host
 * After that just change source and do `git push` - app will be reinstalled and restarted on CI/CD host
 
 ### Via terminal
