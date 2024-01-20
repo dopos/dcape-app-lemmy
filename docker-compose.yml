@@ -68,8 +68,4 @@ services:
       - ./volumes/pictrs:/mnt:Z
     restart: always
     logging: *default-logging
-    deploy:
-      resources:
-        limits:
-          memory: 690m
 
