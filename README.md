@@ -47,6 +47,6 @@ make up
 
 ## License
 
-Copyright 2023 Aleksei Kovrizhkin <lekovr+dopos@gmail.com>
+Copyright 2024 Aleksei Kovrizhkin <lekovr+dopos@gmail.com>
 
 Licensed under the Apache License, Version 2.0 (the "[License](LICENSE)");
