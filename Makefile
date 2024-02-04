@@ -25,7 +25,7 @@ PICTRS_IMAGE       ?= docker.io/asonix/pictrs
 #- pict-rs docker image tag
 PICTRS_IMAGE_VER   ?= 0.4.7
 #- pict-rs API key
-PICTRS_API_KEY     ?= $(shell < /dev/urandom tr -dc A-Za-z0-9 | head -c14; echo)
+PICTRS_API_KEY     ?= $(shell openssl rand -hex 16; echo)
 
 #- Hostname and port of the smtp server
 SMTP_SERVER        ?=
