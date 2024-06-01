@@ -108,7 +108,7 @@ use-template:
 
 prep: lemmy.hjson
 	@echo "Just to show we able to attach"
-	mkdir -p volumes/pictrs
+	[ -d volumes/pictrs ] || mkdir -p volumes/pictrs
 	sudo chown -R 991:991 volumes/pictrs
 
 lemmy.hjson:
