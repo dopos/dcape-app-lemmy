@@ -13,7 +13,7 @@ APP_NAME           ?= lemmy
 IMAGE              ?= dessalines/lemmy-ui
 
 #- Docker image tag
-IMAGE_VER          ?= 0.19.2
+IMAGE_VER          ?= 0.19.3
 
 #- lemmy docker image
 LEMMY_IMAGE        ?= dessalines/lemmy
@@ -23,7 +23,7 @@ LEMMY_IMAGE_VER    ?= $(IMAGE_VER)
 #- pict-rs docker image
 PICTRS_IMAGE       ?= docker.io/asonix/pictrs
 #- pict-rs docker image tag
-PICTRS_IMAGE_VER   ?= 0.4.7
+PICTRS_IMAGE_VER   ?= 0.5.0
 #- pict-rs API key
 PICTRS_API_KEY     ?= $(shell openssl rand -hex 16; echo)
 
